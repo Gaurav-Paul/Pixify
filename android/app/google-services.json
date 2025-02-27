@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "100228048467",
+    "firebase_url": "https://pixify-f1e57-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pixify-f1e57",
+    "storage_bucket": "pixify-f1e57.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:100228048467:android:b1b23b73e15d6c108308a6",
+        "android_client_info": {
+          "package_name": "com.gaurav.pixify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "100228048467-tveh2v5odle9oc8opi09hss103qknh62.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaurav.pixify",
+            "certificate_hash": "c2a6581421ba987df983b17d0af6a2b9a7c2b761"
+          }
+        },
+        {
+          "client_id": "100228048467-kbq0jhcqj8vq8r8ohuc72hci2hhs953r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCdROInY6wMhw_6U4CBNY1N6HNThYcAJw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "100228048467-kbq0jhcqj8vq8r8ohuc72hci2hhs953r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
