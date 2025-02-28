@@ -1,12 +1,15 @@
 class SettingsModel {
-  final bool darkTheme;
+  final bool isLoading;
+  final String loadingText;
   SettingsModel({
-    required this.darkTheme,
+    required this.isLoading,
+    required this.loadingText,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'darkTheme': darkTheme,
+      'isLoading': isLoading,
+      'loadingText': loadingText,
     };
   }
 
@@ -14,7 +17,8 @@ class SettingsModel {
     return map == null
         ? null
         : SettingsModel(
-            darkTheme: map['darkTheme'],
+            isLoading: map['isLoading'],
+            loadingText: map['loadingText'],
           );
   }
 }

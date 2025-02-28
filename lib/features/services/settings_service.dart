@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:pixify/features/settings/settings_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-SettingsModel settingsValues = SettingsModel(darkTheme: true);
+SettingsModel settingsValues = SettingsModel(
+  isLoading: false,
+  loadingText: '',
+);
 
 class SettingsService {
   static final StreamController<SettingsModel> settingsStream =
@@ -23,7 +26,8 @@ class SettingsService {
       final SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
       final Map<String, dynamic> finalMap = {
-        'darkTheme': sharedPreferences.getBool('darkTheme'),
+        'isLoading': sharedPreferences.getBool('isLoading'),
+        'loadingText': sharedPreferences.getString('loadingText'),
       };
       if (finalMap.values.contains(null)) {
         throw "no shared preference set!!!";
@@ -38,6 +42,13 @@ class SettingsService {
   static Future setBaseSettingsInSharedPref() async {
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
-    sharedPreferences.setBool("darkTheme", settingsValues.darkTheme);
+    sharedPreferences.setBool(
+      "isLoading",
+      settingsValues.isLoading,
+    );
+    sharedPreferences.setString(
+      "loadingText",
+      settingsValues.loadingText,
+    );
   }
 }

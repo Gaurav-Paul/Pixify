@@ -38,15 +38,28 @@ class AppRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     SettingsModel currentSettings = Provider.of<SettingsModel>(context);
 
-    return MaterialApp(
-      themeMode: currentSettings.darkTheme ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      debugShowCheckedModeBanner: false,
-      home: StreamProvider<User?>.value(
-        initialData: AuthService.auth.currentUser,
-        value: AuthService.auth.authStateChanges(),
-        child: const Wrapper(),
+    return GestureDetector(
+      onTap: FocusScope.of(context).unfocus,
+      child: MaterialApp(
+        theme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
+        home: currentSettings.isLoading
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    Text(currentSettings.loadingText)
+                  ],
+                ),
+              )
+            : StreamProvider<User?>.value(
+                initialData: AuthService.auth.currentUser,
+                value: AuthService.auth.authStateChanges(),
+                child: const Wrapper(),
+              ),
       ),
     );
   }
