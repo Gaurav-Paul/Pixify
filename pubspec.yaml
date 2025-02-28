@@ -12,6 +12,7 @@ dependencies:
   firebase_database: ^11.3.4
   flutter:
     sdk: flutter
+  image_picker: ^1.1.2
   provider: ^6.1.2
   shared_preferences: ^2.5.2
   supabase_flutter: ^2.8.4

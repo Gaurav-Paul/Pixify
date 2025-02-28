@@ -39,20 +39,26 @@ class AppRoot extends StatelessWidget {
     SettingsModel currentSettings = Provider.of<SettingsModel>(context);
 
     return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
+      onTap: () => FocusScope.of(context).unfocus(),
       child: MaterialApp(
         theme: ThemeData.dark(),
         debugShowCheckedModeBanner: false,
         home: currentSettings.isLoading
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    Text(currentSettings.loadingText)
-                  ],
+            ? Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 25),
+                      Text(
+                        currentSettings.loadingText,
+                        style: const TextStyle(fontSize: 18),
+                      )
+                    ],
+                  ),
                 ),
               )
             : StreamProvider<User?>.value(

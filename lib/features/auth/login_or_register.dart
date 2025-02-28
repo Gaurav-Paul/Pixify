@@ -3,7 +3,9 @@ import 'package:pixify/features/auth/login_page.dart';
 import 'package:pixify/features/auth/register_page.dart';
 
 class LoginOrRegister extends StatefulWidget {
-  const LoginOrRegister({super.key});
+  const LoginOrRegister({
+    super.key,
+  });
 
   @override
   State<LoginOrRegister> createState() => _LoginOrRegisterState();
