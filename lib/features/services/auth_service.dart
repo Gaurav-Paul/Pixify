@@ -86,9 +86,28 @@ class AuthService {
     }
   }
 
-  static Future<bool> signOut({
+  signOut({
     required BuildContext context,
   }) async {
-    return false;
+    try {
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true, loadingText: "Trying to sign you out..."));
+
+      await auth.signOut();
+
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true, loadingText: "Succesfully Signed out!"));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ""));
+    } catch (e) {
+      SettingsService.settingsStream.add(
+          SettingsModel(isLoading: true, loadingText: "Failed to sign Out!"));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+
+      showAlertDialog(context: context, content: e.toString());
+    }
   }
 }

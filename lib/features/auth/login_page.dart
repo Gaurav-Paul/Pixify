@@ -30,8 +30,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    print('login ');
-
     await AuthService().signIn(
       email: emailController.text,
       password: passwordController.text,

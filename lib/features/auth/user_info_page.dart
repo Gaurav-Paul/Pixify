@@ -1,9 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pixify/features/auth/components/auth_text_field.dart';
 import 'package:pixify/features/auth/components/image_selector.dart';
+import 'package:pixify/features/services/auth_service.dart';
+import 'package:pixify/features/services/database_service.dart';
+import 'package:pixify/features/services/settings_service.dart';
+import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/helper/show_alert_dialog.dart';
 
 class UserInfoPage extends StatefulWidget {
   final String email;
@@ -23,21 +29,67 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   File? selectedImage;
 
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   imageSelect() async {
-    XFile? imageFile = await ImagePicker().pickImage(
+    late final CroppedFile? croppedImageFile;
+    final XFile? imageFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      imageQuality: 100,
+      imageQuality: 25,
       maxHeight: 750,
       maxWidth: 750,
     );
-    if (mounted) {
-      setState(() {
-        selectedImage = imageFile != null ? File(imageFile.path) : null;
-      });
+
+    if (imageFile != null) {
+      croppedImageFile = await ImageCropper().cropImage(
+        compressQuality: 45,
+        compressFormat: ImageCompressFormat.png,
+        uiSettings: [
+          AndroidUiSettings(aspectRatioPresets: [CropAspectRatioPreset.square])
+        ],
+        sourcePath: File(imageFile.path).path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      );
+    } else {
+      croppedImageFile = null;
+    }
+
+    if (mounted && croppedImageFile != null) {
+      setState(
+        () {
+          selectedImage = File(croppedImageFile!.path);
+        },
+      );
     }
   }
 
-  signUp() async {}
+  signUp() async {
+    if (!(formKey.currentState!.validate()) ||
+        usernameController.text.isEmpty) {
+      return;
+    }
+
+    SettingsService.settingsStream.add(SettingsModel(
+        isLoading: true, loadingText: 'Checking Username Availability...'));
+
+    if (await DatabaseService()
+        .isUsernameInUse(username: usernameController.text)) {
+      showAlertDialog(
+          context: context,
+          content: "Username Already in Use..\n\nPlease try another username");
+      return;
+    }
+
+    Navigator.of(context).pop();
+
+    await AuthService().signUp(
+      email: widget.email,
+      password: widget.password,
+      username: usernameController.text,
+      profilePicFile: selectedImage,
+      context: context,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,23 +105,32 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 const SizedBox(height: 25),
 
                 // Image Selection
-                Center(child: ImageSelector(selectImageFunction: imageSelect)),
+                Center(
+                    child: ImageSelector(
+                  selectImageFunction: imageSelect,
+                  imageFile: selectedImage,
+                )),
 
                 // Spacing
                 const SizedBox(height: 75),
 
                 // Username Field
-                AuthTextField(
-                  obscureText: false,
-                  labelText: 'Username',
-                  controller: usernameController,
-                  icon: Icons.account_circle,
-                  validatorFunction: (value) {
-                    if (value == null || value.isEmpty || value.contains(' ')) {
-                      return "Invalid Username";
-                    }
-                    return null;
-                  },
+                Form(
+                  key: formKey,
+                  child: AuthTextField(
+                    obscureText: false,
+                    labelText: 'Username',
+                    controller: usernameController,
+                    icon: Icons.account_circle,
+                    validatorFunction: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          value.contains(' ')) {
+                        return "Invalid Username";
+                      }
+                      return null;
+                    },
+                  ),
                 ),
 
                 // Spacing
@@ -82,7 +143,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   shape: const StadiumBorder(),
                   child: InkWell(
                     splashColor: Colors.white38,
-                    onTap: () {},
+                    onTap: signUp,
                     child: const SizedBox(
                       height: 75,
                       width: 400,
@@ -93,6 +154,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             fontSize: 36,
                             color: Colors.black87,
                             fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

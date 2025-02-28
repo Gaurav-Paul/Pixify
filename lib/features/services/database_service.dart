@@ -57,9 +57,15 @@ class DatabaseService {
                 .toMap(),
           );
 
+      await database.ref('all users').update({uid: username});
+
       SettingsService.settingsStream.add(
         SettingsModel(
             isLoading: true, loadingText: "Registered you in the database"),
+      );
+
+      SettingsService.settingsStream.add(
+        SettingsModel(isLoading: false, loadingText: ""),
       );
     } catch (e) {
       SettingsService.settingsStream.add(
@@ -70,8 +76,21 @@ class DatabaseService {
         SettingsModel(isLoading: false, loadingText: ""),
       );
 
-      
       showAlertDialog(context: context, content: e.toString());
     }
+  }
+
+  Future<bool> isUsernameInUse({
+    required String username,
+  }) async {
+    final DataSnapshot allUsersDataSnapshot =
+        await database.ref('all users').get();
+
+    if (!(allUsersDataSnapshot.exists)) {
+      return false;
+    }
+
+    final Map allUsersMap = allUsersDataSnapshot.value as Map;
+    return allUsersMap.values.contains(username);
   }
 }

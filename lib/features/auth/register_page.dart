@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pixify/constant_values.dart';
 import 'package:pixify/features/auth/components/auth_text_field.dart';
 import 'package:pixify/features/auth/user_info_page.dart';
+import 'package:pixify/helper/show_alert_dialog.dart';
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback togglePage;
@@ -28,12 +29,16 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!(formKey.currentState!.validate()) ||
         emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty ||
-        passwordController.text != confirmPasswordController.text) {
+        confirmPasswordController.text.isEmpty) {
       return;
     }
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => UserInfoPage(
+
+    if (passwordController.text != confirmPasswordController.text) {
+      showAlertDialog(context: context, content: "Passwords don't match");
+    }
+
+    await Navigator.of(context).push(PageRouteBuilder(
+        pageBuilder: (context, _, __) => UserInfoPage(
             email: emailController.text, password: passwordController.text)));
   }
 
