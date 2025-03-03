@@ -39,24 +39,43 @@ class PostBlock extends StatelessWidget {
                 Expanded(
                   child: postData.child('type').value.toString() == "text"
                       ? Text(postData.child('text').value.toString())
-                      : Image.network(
-                          fit: BoxFit.contain,
-                          postData.child('imageURL').value.toString(),
-                          loadingBuilder: (context, child, loadingProgress) =>
-                              loadingProgress != null
-                                  ? CircularProgressIndicator(
-                                      value: loadingProgress
-                                              .cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!,
-                                      color: Colors.amber,
-                                    )
-                                  : child,
+                      : Card(
+                          clipBehavior: Clip.hardEdge,
+                          child: SizedBox(
+                            height: 300,
+                            width: 300,
+                            child: Image.network(
+                              fit: BoxFit.contain,
+                              postData.child('imageURL').value.toString(),
+                              loadingBuilder:
+                                  (context, child, loadingProgress) =>
+                                      loadingProgress != null
+                                          ? Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!,
+                                                color: Colors.amber,
+                                              ),
+                                            )
+                                          : child,
+                            ),
+                          ),
                         ),
                 ),
                 LikeButton(postData: postData)
               ],
             ),
           ),
+          postData.child('type').value.toString() == 'image' &&
+                  postData.child('text').value.toString().isNotEmpty
+              ? const SizedBox(height: 15)
+              : const SizedBox(),
+          postData.child('type').value.toString() == 'image' &&
+                  postData.child('text').value.toString().isNotEmpty
+              ? Text(postData.child('text').value.toString())
+              : const SizedBox(),
           const Divider(),
         ],
       ),

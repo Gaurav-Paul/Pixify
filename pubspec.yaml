@@ -15,6 +15,7 @@ dependencies:
     
   image_cropper: ^9.0.0
   image_picker: ^1.1.2
+  photo_manager: ^3.6.4
   provider: ^6.1.2
   shared_preferences: ^2.5.2
   supabase_flutter: ^2.8.4

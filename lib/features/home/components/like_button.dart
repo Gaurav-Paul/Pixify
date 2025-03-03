@@ -52,8 +52,8 @@ class _LikeButtonState extends State<LikeButton> {
   Widget build(BuildContext context) {
     return loading
         ? const SizedBox(
-            height: 24,
-            width: 24,
+            height: 48,
+            width: 48,
             child: Center(
               child: CircularProgressIndicator(),
             ),

@@ -39,20 +39,17 @@ class AppRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     SettingsModel currentSettings = Provider.of<SettingsModel>(context);
 
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: MediaQuery.withNoTextScaling(
-        child: MaterialApp(
-          theme: ThemeData.dark(),
-          debugShowCheckedModeBanner: false,
-          home: currentSettings.isLoading
-              ? LoadingScreen(loadingText: currentSettings.loadingText)
-              : StreamProvider<User?>.value(
-                  initialData: AuthService.auth.currentUser,
-                  value: AuthService.auth.authStateChanges(),
-                  child: const Wrapper(),
-                ),
-        ),
+    return MediaQuery.withNoTextScaling(
+      child: MaterialApp(
+        theme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
+        home: currentSettings.isLoading
+            ? LoadingScreen(loadingText: currentSettings.loadingText)
+            : StreamProvider<User?>.value(
+                initialData: AuthService.auth.currentUser,
+                value: AuthService.auth.authStateChanges(),
+                child: const Wrapper(),
+              ),
       ),
     );
   }

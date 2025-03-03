@@ -1,6 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/add%20post/tabs/image_only_tab.dart';
-import 'package:pixify/features/add%20post/tabs/image_with_caption.dart';
 import 'package:pixify/features/add%20post/tabs/text_only_tab.dart';
 
 class AddPostPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class _AddPostPageState extends State<AddPostPage>
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -25,23 +25,26 @@ class _AddPostPageState extends State<AddPostPage>
     return SafeArea(
       child: Scaffold(
         body: TabBarView(
+          dragStartBehavior: DragStartBehavior.down,
           controller: tabController,
           children: [
             TextOnlyTab(),
             const ImageOnlyTab(),
-            const ImageWithCaption(),
           ],
         ),
-        bottomNavigationBar: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TabPageSelector(
-              indicatorSize: 15,
-              color: Colors.black,
-              selectedColor: Colors.amber,
-              controller: tabController,
-            ),
-          ],
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50),
+          child: TabBar(
+            dividerHeight: 0,
+            indicatorColor: Colors.amber,
+            labelColor: Colors.amber,
+            splashFactory: NoSplash.splashFactory,
+            controller: tabController,
+            tabs: const [
+              Text("Text"),
+              Text("Image"),
+            ],
+          ),
         ),
       ),
     );

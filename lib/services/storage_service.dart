@@ -31,4 +31,28 @@ class StorageService {
       return null;
     }
   }
+
+  Future<String?> uploadImageForPost({
+    required BuildContext context,
+    required String authorID,
+    required File imageFile,
+    required String postID,
+  }) async {
+    try {
+      await storage.from('posts').upload('$authorID/$postID', imageFile);
+
+      return storage.from('posts').getPublicUrl('$authorID/$postID');
+    } catch (e) {
+
+      print(e.toString());
+      SettingsService.settingsStream.add(
+          SettingsModel(isLoading: true, loadingText: 'An Error Occured!'));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+
+      showAlertDialog(context: context, content: e.toString());
+      return null;
+    }
+  }
 }

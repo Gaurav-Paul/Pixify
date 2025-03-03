@@ -150,11 +150,83 @@ class DatabaseService {
     }
   }
 
+  addImagePost({
+    required File imageFile,
+    String? text,
+    required BuildContext context,
+    required String authorID,
+    required DateTime postDate,
+  }) async {
+    try {
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true,
+          loadingText: 'Uploading Your post.\nDont close the App'));
+
+      final String postID =
+          "$authorID ${(await database.ref('users').child(authorID).child("posts").get()).children.length}";
+
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true,
+          loadingText: 'Uploading Your image to the database'));
+
+      String? imageURL = await StorageService().uploadImageForPost(
+          context: context,
+          authorID: authorID,
+          imageFile: imageFile,
+          postID: postID);
+
+      if (imageURL == null) {
+        throw "Image wasn't uploaded";
+      }
+
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true,
+          loadingText: 'Uploading Your post\'s data to the database'));
+
+      await database
+          .ref('users')
+          .child(authorID)
+          .child("posts")
+          .child(postID)
+          .set(
+        {
+          'postID': postID,
+          "uid": authorID,
+          'type': "image",
+          'date': postDate.microsecondsSinceEpoch.toString(),
+          'text': text ?? '',
+          "imageURL": imageURL,
+          'likedBy': ['placeHolder'],
+        },
+      );
+
+      await database.ref('all posts').update(
+        {
+          postID: authorID,
+        },
+      );
+
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true, loadingText: 'Done Uploading Your post!'));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+    } catch (e) {
+      SettingsService.settingsStream.add(
+          SettingsModel(isLoading: true, loadingText: 'An Error Occured!'));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+
+      showAlertDialog(context: context, content: e.toString());
+    }
+  }
+
   likePost(
       {required String postID,
       required String authorUID,
       required String currentUserUID}) async {
-    int no_of_likes = (await database
+    int noOfLikes = (await database
             .ref('users')
             .child(authorUID)
             .child("posts")
@@ -169,7 +241,7 @@ class DatabaseService {
         .child("posts")
         .child(postID)
         .child('likedBy')
-        .update({no_of_likes.toString(): currentUserUID});
+        .update({noOfLikes.toString(): currentUserUID});
   }
 
   dislikePost({

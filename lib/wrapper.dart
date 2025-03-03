@@ -13,7 +13,9 @@ class Wrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final User? user = Provider.of<User?>(context);
     return user == null
-        ? const LoginOrRegister()
+        ? GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: const LoginOrRegister())
         : StreamProvider<DatabaseEvent?>.value(
             initialData: null,
             value: DatabaseService.getEntireDatabaseStream(),
