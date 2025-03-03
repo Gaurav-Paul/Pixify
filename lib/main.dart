@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:pixify/features/loading/loading_screen.dart';
 import 'package:pixify/features/services/auth_service.dart';
 import 'package:pixify/features/services/settings_service.dart';
 import 'package:pixify/features/settings/settings_model.dart';
@@ -44,23 +45,7 @@ class AppRoot extends StatelessWidget {
         theme: ThemeData.dark(),
         debugShowCheckedModeBanner: false,
         home: currentSettings.isLoading
-            ? Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 25),
-                      Text(
-                        currentSettings.loadingText,
-                        style: const TextStyle(fontSize: 18),
-                      )
-                    ],
-                  ),
-                ),
-              )
+            ? LoadingScreen(loadingText: currentSettings.loadingText)
             : StreamProvider<User?>.value(
                 initialData: AuthService.auth.currentUser,
                 value: AuthService.auth.authStateChanges(),

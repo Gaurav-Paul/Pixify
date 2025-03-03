@@ -93,4 +93,8 @@ class DatabaseService {
     final Map allUsersMap = allUsersDataSnapshot.value as Map;
     return allUsersMap.values.contains(username);
   }
+
+  static Stream<DatabaseEvent> getEntireDatabaseStream() {
+    return database.ref(null).onValue.asBroadcastStream();
+  }
 }

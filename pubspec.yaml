@@ -12,6 +12,7 @@ dependencies:
   firebase_database: ^11.3.4
   flutter:
     sdk: flutter
+    
   image_cropper: ^9.0.0
   image_picker: ^1.1.2
   provider: ^6.1.2
@@ -25,3 +26,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    -  assets/
