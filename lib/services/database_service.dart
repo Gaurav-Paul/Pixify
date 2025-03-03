@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/constant_values.dart';
-import 'package:pixify/features/services/settings_service.dart';
-import 'package:pixify/features/services/storage_service.dart';
+import 'package:pixify/services/settings_service.dart';
+import 'package:pixify/services/storage_service.dart';
 import 'package:pixify/features/settings/settings_model.dart';
 import 'package:pixify/helper/show_alert_dialog.dart';
 import 'package:pixify/models/user_model.dart';
@@ -96,5 +96,94 @@ class DatabaseService {
 
   static Stream<DatabaseEvent> getEntireDatabaseStream() {
     return database.ref(null).onValue.asBroadcastStream();
+  }
+
+  Future<void> addTextOnlyPost({
+    required String text,
+    required String authorID,
+    required DateTime postDate,
+    required BuildContext context,
+  }) async {
+    try {
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true,
+          loadingText: 'Uploading Your post.\nDont close the App'));
+
+      final String postID =
+          "$authorID ${(await database.ref('users').child(authorID).child("posts").get()).children.length}";
+
+      await database
+          .ref('users')
+          .child(authorID)
+          .child("posts")
+          .child(postID)
+          .set(
+        {
+          'postID': postID,
+          "uid": authorID,
+          'type': "text",
+          'date': postDate.microsecondsSinceEpoch.toString(),
+          'text': text,
+          'likedBy': ['placeHolder'],
+        },
+      );
+
+      await database.ref('all posts').update(
+        {
+          postID: authorID,
+        },
+      );
+
+      SettingsService.settingsStream.add(SettingsModel(
+          isLoading: true, loadingText: 'Done Uploading Your post!'));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+    } catch (e) {
+      SettingsService.settingsStream.add(
+          SettingsModel(isLoading: true, loadingText: 'An Error Occured!'));
+
+      SettingsService.settingsStream
+          .add(SettingsModel(isLoading: false, loadingText: ''));
+
+      showAlertDialog(context: context, content: e.toString());
+    }
+  }
+
+  likePost(
+      {required String postID,
+      required String authorUID,
+      required String currentUserUID}) async {
+    int no_of_likes = (await database
+            .ref('users')
+            .child(authorUID)
+            .child("posts")
+            .child(postID)
+            .child('likedBy')
+            .get())
+        .children
+        .length;
+    await database
+        .ref('users')
+        .child(authorUID)
+        .child("posts")
+        .child(postID)
+        .child('likedBy')
+        .update({no_of_likes.toString(): currentUserUID});
+  }
+
+  dislikePost({
+    required String postID,
+    required int keyToRemove,
+    required String authorUID,
+  }) async {
+    await database
+        .ref('users')
+        .child(authorUID)
+        .child('posts')
+        .child(postID)
+        .child('likedBy')
+        .child(keyToRemove.toString())
+        .remove();
   }
 }

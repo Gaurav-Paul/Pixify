@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/loading/loading_screen.dart';
-import 'package:pixify/features/services/auth_service.dart';
-import 'package:pixify/features/services/settings_service.dart';
+import 'package:pixify/services/auth_service.dart';
+import 'package:pixify/services/settings_service.dart';
 import 'package:pixify/features/settings/settings_model.dart';
 import 'package:pixify/supabase_initializer.dart';
 import 'package:pixify/wrapper.dart';
@@ -41,16 +41,18 @@ class AppRoot extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: MaterialApp(
-        theme: ThemeData.dark(),
-        debugShowCheckedModeBanner: false,
-        home: currentSettings.isLoading
-            ? LoadingScreen(loadingText: currentSettings.loadingText)
-            : StreamProvider<User?>.value(
-                initialData: AuthService.auth.currentUser,
-                value: AuthService.auth.authStateChanges(),
-                child: const Wrapper(),
-              ),
+      child: MediaQuery.withNoTextScaling(
+        child: MaterialApp(
+          theme: ThemeData.dark(),
+          debugShowCheckedModeBanner: false,
+          home: currentSettings.isLoading
+              ? LoadingScreen(loadingText: currentSettings.loadingText)
+              : StreamProvider<User?>.value(
+                  initialData: AuthService.auth.currentUser,
+                  value: AuthService.auth.authStateChanges(),
+                  child: const Wrapper(),
+                ),
+        ),
       ),
     );
   }

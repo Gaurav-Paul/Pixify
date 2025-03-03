@@ -3,7 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/auth/login_or_register.dart';
 import 'package:pixify/features/content%20wrapper/content_wrapper.dart';
-import 'package:pixify/features/services/database_service.dart';
+import 'package:pixify/services/database_service.dart';
 import 'package:provider/provider.dart';
 
 class Wrapper extends StatelessWidget {

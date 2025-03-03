@@ -4,7 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/home/components/post_block.dart';
 import 'package:pixify/features/loading/loading_screen.dart';
-import 'package:pixify/features/services/auth_service.dart';
+import 'package:pixify/services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   final DataSnapshot currentDatabaseSnapshot;
@@ -190,11 +190,16 @@ class _HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   itemCount: noOfPostsShown + 1,
                   itemBuilder: (context, index) {
+                    if (index == noOfPostsShown) {
+                      return const Center(child: Text("Load More"));
+                    }
+
                     return PostBlock(
-                      authorID: mapOfAllUserPosts![listOfPosts![index]],
+                      currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
                       postData: widget.currentDatabaseSnapshot
                           .child('users')
                           .child(mapOfAllUserPosts![listOfPosts![index]])
+                          .child('posts')
                           .child(listOfPosts![index]),
                     );
                   },

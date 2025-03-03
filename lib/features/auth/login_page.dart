@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pixify/constant_values.dart';
 import 'package:pixify/features/auth/components/auth_text_field.dart';
-import 'package:pixify/features/services/auth_service.dart';
+import 'package:pixify/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback togglePage;
