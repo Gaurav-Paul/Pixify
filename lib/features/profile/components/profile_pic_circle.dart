@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 class ProfilePicCircle extends StatelessWidget {
   final String profilePicURL;
+  final double? bigCircleRadius;
+  final double? imageCircleRadius;
   const ProfilePicCircle({
     super.key,
     required this.profilePicURL,
+    this.bigCircleRadius,
+    this.imageCircleRadius,
   });
 
   @override
@@ -12,7 +16,7 @@ class ProfilePicCircle extends StatelessWidget {
     return GestureDetector(
       onDoubleTap: () => Navigator.of(context).push(
         PageRouteBuilder(
-          barrierColor: Colors.white54,
+          barrierColor: Colors.white24,
           opaque: false,
           pageBuilder: (context, _, __) => Center(
             child: SizedBox(
@@ -63,9 +67,9 @@ class ProfilePicCircle extends StatelessWidget {
       ),
       child: CircleAvatar(
         backgroundColor: Colors.amber,
-        radius: 25,
+        radius: bigCircleRadius ?? 25,
         child: CircleAvatar(
-          radius: 23,
+          radius: imageCircleRadius ?? 23,
           backgroundColor: Colors.black,
           foregroundImage: NetworkImage(profilePicURL),
         ),

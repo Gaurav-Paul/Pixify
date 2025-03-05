@@ -5,7 +5,7 @@ import 'package:pixify/services/database_service.dart';
 
 class LikeButton extends StatefulWidget {
   final DataSnapshot postData;
-  LikeButton({
+  const LikeButton({
     super.key,
     required this.postData,
   });

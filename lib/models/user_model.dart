@@ -6,6 +6,9 @@ class UserModel {
   final List posts;
   final List followers;
   final List following;
+  final List conversations;
+  final bool active;
+  final int lastSeen;
   final bool isPrivate;
 
   UserModel({
@@ -17,6 +20,9 @@ class UserModel {
     required this.followers,
     required this.following,
     required this.isPrivate,
+    required this.conversations,
+    required this.active,
+    required this.lastSeen,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,7 +34,10 @@ class UserModel {
       'posts': posts,
       'followers': followers,
       'following': following,
-      'isPrivate': isPrivate
+      'isPrivate': isPrivate,
+      "active": true,
+      "lastSeen": DateTime.now().microsecondsSinceEpoch,
+      "conversations": conversations,
     };
   }
 
@@ -42,6 +51,9 @@ class UserModel {
       followers: map['followers'],
       following: map['following'],
       isPrivate: map['isPrivate'],
+      conversations: map['conversations'],
+      active: map["active"],
+      lastSeen: map['lastSeen'],
     );
   }
 }

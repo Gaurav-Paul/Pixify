@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/constant_values.dart';
+import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/settings_service.dart';
 import 'package:pixify/services/storage_service.dart';
 import 'package:pixify/features/settings/settings_model.dart';
@@ -13,6 +14,40 @@ class DatabaseService {
   static final FirebaseDatabase database = FirebaseDatabase.instance
     ..refFromURL(
         'https://pixify-f1e57-default-rtdb.asia-southeast1.firebasedatabase.app/');
+
+  updateUserPresence({
+    bool? signOut,
+    String? uid,
+  }) {
+    database.ref(".info/connected").onValue.listen((event) async {
+      bool connectedStatus = event.snapshot.value as bool? ?? false;
+
+      if (signOut == true) {
+        await database.ref("users/$uid").update({
+          "active": false,
+          "lastSeen": DateTime.now().microsecondsSinceEpoch
+        });
+        return;
+      }
+
+      if (connectedStatus) {
+        await database
+            .ref("users/${uid ?? AuthService.auth.currentUser!.uid}")
+            .update({
+          "active": true,
+          "lastSeen": DateTime.now().microsecondsSinceEpoch
+        });
+      } else {
+        await database
+            .ref("users/${uid ?? AuthService.auth.currentUser!.uid}")
+            .onDisconnect()
+            .update({
+          "active": false,
+          "lastSeen": DateTime.now().microsecondsSinceEpoch
+        });
+      }
+    });
+  }
 
   setUserBaseValues({
     required String email,
@@ -46,15 +81,18 @@ class DatabaseService {
 
       await database.ref('users').child(uid).set(
             UserModel(
-                    username: username,
-                    uid: uid,
-                    email: email,
-                    profilePicURL: profilePicURL,
-                    posts: ['placeHolder'],
-                    followers: ['placeHolder'],
-                    following: ['placeHolder'],
-                    isPrivate: false)
-                .toMap(),
+              username: username,
+              uid: uid,
+              email: email,
+              profilePicURL: profilePicURL,
+              posts: ['placeHolder'],
+              followers: ['placeHolder'],
+              following: ['placeHolder'],
+              isPrivate: false,
+              active: true,
+              conversations: ["placeHolder"],
+              lastSeen: DateTime.now().microsecondsSinceEpoch,
+            ).toMap(),
           );
 
       await database.ref('all users').update({uid: username});
@@ -257,5 +295,139 @@ class DatabaseService {
         .child('likedBy')
         .child(keyToRemove.toString())
         .remove();
+  }
+
+  toggleFollow({
+    required BuildContext context,
+    required bool follow,
+    required String userID,
+  }) async {
+    try {
+      if (follow) {
+        try {
+          await database.ref('users').child(userID).child('followers').update({
+            ((await database
+                        .ref('users')
+                        .child(userID)
+                        .child('followers')
+                        .get())
+                    .value as List)
+                .length
+                .toString(): AuthService.auth.currentUser!.uid,
+          });
+
+          await database
+              .ref('users')
+              .child(AuthService.auth.currentUser!.uid)
+              .child('following')
+              .update({
+            ((await database
+                        .ref('users')
+                        .child(AuthService.auth.currentUser!.uid)
+                        .child('following')
+                        .get())
+                    .value as List)
+                .length
+                .toString(): userID,
+          });
+        } catch (e) {
+          try {
+            await database
+                .ref('users')
+                .child(userID)
+                .child('followers')
+                .update({
+              ((await database
+                          .ref('users')
+                          .child(userID)
+                          .child('followers')
+                          .get())
+                      .value as Map)
+                  .length
+                  .toString(): AuthService.auth.currentUser!.uid,
+            });
+
+            await database
+                .ref('users')
+                .child(AuthService.auth.currentUser!.uid)
+                .child('following')
+                .update({
+              ((await database
+                          .ref('users')
+                          .child(AuthService.auth.currentUser!.uid)
+                          .child('following')
+                          .get())
+                      .value as Map)
+                  .length
+                  .toString(): userID,
+            });
+          } catch (e) {}
+        }
+      } else {
+        try {
+          await database
+              .ref('users')
+              .child(userID)
+              .child('followers')
+              .child(((await database
+                          .ref('users')
+                          .child(userID)
+                          .child('followers')
+                          .get())
+                      .value as List)
+                  .indexOf(AuthService.auth.currentUser!.uid)
+                  .toString())
+              .remove();
+
+          await database
+              .ref('users')
+              .child(AuthService.auth.currentUser!.uid)
+              .child('following')
+              .child(((await database
+                          .ref('users')
+                          .child(AuthService.auth.currentUser!.uid)
+                          .child('following')
+                          .get())
+                      .value as List)
+                  .indexOf(userID)
+                  .toString())
+              .remove();
+        } catch (e) {
+          await database
+              .ref('users')
+              .child(userID)
+              .child('followers')
+              .child((((await database
+                              .ref('users')
+                              .child(userID)
+                              .child('followers')
+                              .get())
+                          .value as Map)
+                      .values
+                      .toList())
+                  .indexOf(AuthService.auth.currentUser!.uid)
+                  .toString())
+              .remove();
+
+          await database
+              .ref('users')
+              .child(AuthService.auth.currentUser!.uid)
+              .child('following')
+              .child(((await database
+                          .ref('users')
+                          .child(AuthService.auth.currentUser!.uid)
+                          .child('following')
+                          .get())
+                      .value as Map)
+                  .values
+                  .toList()
+                  .indexOf(userID)
+                  .toString())
+              .remove();
+        }
+      }
+    } catch (e) {
+      showAlertDialog(context: context, content: e.toString());
+    }
   }
 }

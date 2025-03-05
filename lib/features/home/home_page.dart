@@ -37,12 +37,14 @@ class _HomePageState extends State<HomePage> {
             (key, value) => value == currentUserUID,
           ))
         .keys
+        .toList()
+        .toSet()
         .toList();
 
     if (mounted) {
       setState(
         () {
-          listOfPosts = listOfAllPostIds..shuffle(Random());
+          listOfPosts = (listOfAllPostIds..shuffle(Random())).toSet().toList();
           mapOfAllUserPosts = mapOfAllUserPosts;
           if (noOfPostsShown > listOfPosts!.length) {
             noOfPostsShown = listOfPosts!.length;
@@ -68,9 +70,11 @@ class _HomePageState extends State<HomePage> {
                 )),
           ))
         .keys
+        .toList()
+        .toSet()
         .toList();
 
-    final List listOfNotFollowedUsersPosts = (mapOfAllUsers
+    final List listOfNotFollowedUsers = (mapOfAllUsers
           ..removeWhere((key, value) =>
               value == currentUserUID ||
               followedUsers.contains(
@@ -78,16 +82,31 @@ class _HomePageState extends State<HomePage> {
               )))
         .keys
         .toList()
+        .toSet()
+        .toList()
       ..shuffle();
 
-    for (int index = 0; index < listOfAllPostIds.length; index++) {
+    final List listOfNotFollowedUsersPosts = ((mapOfAllUserPosts)
+          ..removeWhere((key, value) =>
+              value == currentUserUID ||
+              !(listOfNotFollowedUsers.contains(
+                value,
+              ))))
+        .keys
+        .toList()
+        .toSet()
+        .toList();
+
+    print(listOfNotFollowedUsersPosts);
+
+    for (int index = 0; index < listOfAllPostIds.length / 5; index++) {
       listOfAllPostIds.add(listOfNotFollowedUsersPosts[index]);
     }
 
     if (mounted) {
       setState(
         () {
-          listOfPosts = listOfAllPostIds..shuffle(Random());
+          listOfPosts = (listOfAllPostIds..shuffle(Random())).toSet().toList();
           mapOfAllUserPosts = mapOfAllUserPosts;
           if (noOfPostsShown > listOfPosts!.length) {
             noOfPostsShown = listOfPosts!.length;
@@ -101,12 +120,27 @@ class _HomePageState extends State<HomePage> {
 
   // Reccomendation Choosing Method
   void selectPostsToShowTheUser() async {
-    final List followedUsers = List.from(widget.currentDatabaseSnapshot
-        .child('users')
-        .child(currentUserUID)
-        .child('following')
-        .value as Iterable)
-      ..remove('placeHolder');
+    late final followedUsers;
+    try {
+      followedUsers = (List.from(widget.currentDatabaseSnapshot
+              .child('users')
+              .child(currentUserUID)
+              .child('following')
+              .value as List)
+            ..remove('placeHolder'))
+          .toSet()
+          .toList();
+    } catch (e) {
+      followedUsers = (List.from((widget.currentDatabaseSnapshot
+                  .child('users')
+                  .child(currentUserUID)
+                  .child('following')
+                  .value as Map)
+              .values)
+            ..remove('placeHolder'))
+          .toSet()
+          .toList();
+    }
 
     final Map mapOfAllUsers =
         (widget.currentDatabaseSnapshot.child('all users').value as Map);
@@ -132,12 +166,14 @@ class _HomePageState extends State<HomePage> {
     if (followedUsers.isEmpty) {
       await notFilteredRecommendationFunction(
           mapOfAllUserPosts: mapOfAllUserPosts!);
+      return;
     }
 
     // In case User is following every user on the platform
-    else if (followedUsers.length == mapOfAllUsers.length) {
+    else if (followedUsers.length == mapOfAllUsers.keys.length) {
       await notFilteredRecommendationFunction(
           mapOfAllUserPosts: mapOfAllUserPosts!);
+      return;
     }
 
     // When the User is a Normal Person
@@ -147,6 +183,7 @@ class _HomePageState extends State<HomePage> {
         mapOfAllUsers: mapOfAllUsers,
         followedUsers: followedUsers,
       );
+      return;
     }
   }
 
@@ -158,6 +195,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List listOfPostsToBeShown = (listOfPosts!.toSet().toList());
     return listOfPosts == null || mapOfAllUserPosts == null
         ? const LoadingScreen(loadingText: 'Loading some posts For you')
         : listOfPosts!.isEmpty
@@ -191,16 +229,27 @@ class _HomePageState extends State<HomePage> {
                   itemCount: noOfPostsShown + 1,
                   itemBuilder: (context, index) {
                     if (index == noOfPostsShown) {
-                      return const Center(child: Text("Load More"));
+                      return const Center(
+                        child: Card(
+                          child: SizedBox(
+                            height: 75,
+                            width: 100,
+                            child: Center(
+                              child: Text("Load More"),
+                            ),
+                          ),
+                        ),
+                      );
                     }
 
                     return PostBlock(
                       currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
                       postData: widget.currentDatabaseSnapshot
                           .child('users')
-                          .child(mapOfAllUserPosts![listOfPosts![index]])
+                          .child(
+                              mapOfAllUserPosts![listOfPostsToBeShown[index]])
                           .child('posts')
-                          .child(listOfPosts![index]),
+                          .child(listOfPostsToBeShown[index]),
                     );
                   },
                 ),

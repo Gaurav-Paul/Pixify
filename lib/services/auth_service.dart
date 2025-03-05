@@ -93,6 +93,9 @@ class AuthService {
       SettingsService.settingsStream.add(SettingsModel(
           isLoading: true, loadingText: "Trying to sign you out..."));
 
+      await DatabaseService()
+          .updateUserPresence(signOut: true, uid: auth.currentUser!.uid);
+
       await auth.signOut();
 
       SettingsService.settingsStream.add(SettingsModel(

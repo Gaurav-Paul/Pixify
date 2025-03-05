@@ -6,10 +6,12 @@ import 'package:pixify/features/profile/components/profile_pic_circle.dart';
 class PostBlock extends StatelessWidget {
   final DataSnapshot currentDatabaseSnapshot;
   final DataSnapshot postData;
+  final bool? isOwner;
   const PostBlock({
     super.key,
     required this.postData,
     required this.currentDatabaseSnapshot,
+    this.isOwner,
   });
 
   @override
@@ -64,7 +66,9 @@ class PostBlock extends StatelessWidget {
                           ),
                         ),
                 ),
-                LikeButton(postData: postData)
+                isOwner ?? false
+                    ? const SizedBox()
+                    : LikeButton(postData: postData)
               ],
             ),
           ),
