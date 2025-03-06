@@ -20,7 +20,7 @@ class _ImagePostGridState extends State<ImagePostGrid> {
   late List listOfImagePosts;
   bool loading = true;
 
-   getImagePosts() async {
+  getImagePosts() async {
     listOfImagePosts = ((await DatabaseService.database
                     .ref(null)
                     .child('users')
@@ -86,92 +86,108 @@ class _ImagePostGridState extends State<ImagePostGrid> {
                             onVerticalDragStart: (_) =>
                                 Navigator.of(context).pop(),
                             child: Center(
-                              child: Card(
-                                child: SizedBox(
-                                  height: 450,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      children: [
-                                        ListTile(
-                                          leading: ProfilePicCircle(
-                                            profilePicURL: widget
-                                                .currentDatabaseSnapshot
-                                                .child('users')
-                                                .child(widget.userID)
-                                                .child('profilePicURL')
-                                                .value
-                                                .toString(),
-                                          ),
-                                          title: Text(widget
-                                              .currentDatabaseSnapshot
-                                              .child('users')
-                                              .child(widget.userID)
-                                              .child('username')
-                                              .value
-                                              .toString()),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Card(
-                                          clipBehavior: Clip.hardEdge,
-                                          child: SizedBox(
-                                            height: 300,
-                                            width: 300,
-                                            child: Image.network(
-                                              fit: BoxFit.contain,
-                                              listOfImagePosts[index]
-                                                  .child('imageURL')
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Card(
+                                    child: SizedBox(
+                                      height: 450,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            ListTile(
+                                              leading: ProfilePicCircle(
+                                                profilePicURL: widget
+                                                    .currentDatabaseSnapshot
+                                                    .child('users')
+                                                    .child(widget.userID)
+                                                    .child('profilePicURL')
+                                                    .value
+                                                    .toString(),
+                                              ),
+                                              title: Text(widget
+                                                  .currentDatabaseSnapshot
+                                                  .child('users')
+                                                  .child(widget.userID)
+                                                  .child('username')
                                                   .value
-                                                  .toString(),
-                                              loadingBuilder: (context, child,
-                                                      loadingProgress) =>
-                                                  loadingProgress != null
-                                                      ? Center(
-                                                          child:
-                                                              CircularProgressIndicator(
-                                                            value: loadingProgress
-                                                                    .cumulativeBytesLoaded /
-                                                                loadingProgress
-                                                                    .expectedTotalBytes!,
-                                                            color: Colors.amber,
-                                                          ),
-                                                        )
-                                                      : child,
+                                                  .toString()),
                                             ),
-                                          ),
+                                            const SizedBox(height: 10),
+                                            Card(
+                                              clipBehavior: Clip.hardEdge,
+                                              child: SizedBox(
+                                                height: 300,
+                                                width: 300,
+                                                child: Image.network(
+                                                  fit: BoxFit.contain,
+                                                  listOfImagePosts[index]
+                                                      .child('imageURL')
+                                                      .value
+                                                      .toString(),
+                                                  loadingBuilder: (context,
+                                                          child,
+                                                          loadingProgress) =>
+                                                      loadingProgress != null
+                                                          ? Center(
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                value: loadingProgress
+                                                                        .cumulativeBytesLoaded /
+                                                                    loadingProgress
+                                                                        .expectedTotalBytes!,
+                                                                color: Colors
+                                                                    .amber,
+                                                              ),
+                                                            )
+                                                          : child,
+                                                ),
+                                              ),
+                                            ),
+                                            listOfImagePosts[index]
+                                                            .child('type')
+                                                            .value
+                                                            .toString() ==
+                                                        'image' &&
+                                                    listOfImagePosts[index]
+                                                        .child('text')
+                                                        .value
+                                                        .toString()
+                                                        .isNotEmpty
+                                                ? const SizedBox(height: 15)
+                                                : const SizedBox(),
+                                            listOfImagePosts[index]
+                                                            .child('type')
+                                                            .value
+                                                            .toString() ==
+                                                        'image' &&
+                                                    listOfImagePosts[index]
+                                                        .child('text')
+                                                        .value
+                                                        .toString()
+                                                        .isNotEmpty
+                                                ? Text(listOfImagePosts[index]
+                                                    .child('text')
+                                                    .value
+                                                    .toString())
+                                                : const SizedBox()
+                                          ],
                                         ),
-                                        listOfImagePosts[index]
-                                                        .child('type')
-                                                        .value
-                                                        .toString() ==
-                                                    'image' &&
-                                                listOfImagePosts[index]
-                                                    .child('text')
-                                                    .value
-                                                    .toString()
-                                                    .isNotEmpty
-                                            ? const SizedBox(height: 15)
-                                            : const SizedBox(),
-                                        listOfImagePosts[index]
-                                                        .child('type')
-                                                        .value
-                                                        .toString() ==
-                                                    'image' &&
-                                                listOfImagePosts[index]
-                                                    .child('text')
-                                                    .value
-                                                    .toString()
-                                                    .isNotEmpty
-                                            ? Text(listOfImagePosts[index]
-                                                .child('text')
-                                                .value
-                                                .toString())
-                                            : const SizedBox()
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(height: 10),
+                                  IconButton.filled(
+                                    style: IconButton.styleFrom(
+                                        backgroundColor: Colors.black45),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    icon: const Icon(Icons.close,
+                                        color: Colors.white),
+                                  )
+                                ],
                               ),
                             ),
                           ),

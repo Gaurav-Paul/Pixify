@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:pixify/features/messaging/call/call_page.dart';
 import 'package:pixify/features/messaging/components/chat_bubble.dart';
 import 'package:pixify/features/messaging/components/chat_text_field.dart';
 import 'package:pixify/features/profile/components/profile_pic_circle.dart';
@@ -110,6 +111,28 @@ class ChatPage extends StatelessWidget {
                     ),
                   ],
                 ),
+                actions: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CallPage(
+                            uid: userID,
+                            username: currentDatabaseSnapshot
+                                .child('users')
+                                .child(userID)
+                                .child('username')
+                                .value
+                                .toString(),
+                            callID:
+                                ((AuthService.auth.currentUser!.uid + userID)
+                                        .split('')
+                                      ..sort())
+                                    .toString()),
+                      ),
+                    ),
+                    icon: const Icon(Icons.call),
+                  )
+                ],
               ),
               body: Column(
                 children: [

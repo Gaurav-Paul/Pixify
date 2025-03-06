@@ -43,8 +43,8 @@ class StorageService {
 
       return storage.from('posts').getPublicUrl('$authorID/$postID');
     } catch (e) {
-
       print(e.toString());
+
       SettingsService.settingsStream.add(
           SettingsModel(isLoading: true, loadingText: 'An Error Occured!'));
 

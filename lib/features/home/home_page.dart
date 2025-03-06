@@ -3,12 +3,11 @@ import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/home/components/post_block.dart';
-import 'package:pixify/features/loading/loading_screen.dart';
 import 'package:pixify/services/auth_service.dart';
+import 'package:pixify/services/database_service.dart';
 
 class HomePage extends StatefulWidget {
   final DataSnapshot currentDatabaseSnapshot;
-
   const HomePage({
     super.key,
     required this.currentDatabaseSnapshot,
@@ -27,232 +26,201 @@ class _HomePageState extends State<HomePage> {
 
   Map? mapOfAllUserPosts;
 
-  // Various Reccomendation Functions:
+  // recommendation functions
 
-  Future<void> notFilteredRecommendationFunction({
-    required Map mapOfAllUserPosts,
-  }) async {
-    final List listOfAllPostIds = (mapOfAllUserPosts
+  showAllUserPosts() async {
+    mapOfAllUserPosts =
+        ((await DatabaseService.database.ref('all posts').get()).value as Map)
           ..removeWhere(
-            (key, value) => value == currentUserUID,
-          ))
-        .keys
-        .toList()
-        .toSet()
-        .toList();
+            (postID, authorID) => authorID == AuthService.auth.currentUser!.uid,
+          );
 
-    if (mounted) {
-      setState(
-        () {
-          listOfPosts = (listOfAllPostIds..shuffle(Random())).toSet().toList();
-          mapOfAllUserPosts = mapOfAllUserPosts;
-          if (noOfPostsShown > listOfPosts!.length) {
-            noOfPostsShown = listOfPosts!.length;
-          }
-        },
-      );
-    }
+    listOfPosts = mapOfAllUserPosts!.keys.toList(growable: true)
+      ..shuffle(Random());
 
-    return;
+    setState(() {
+      listOfPosts = listOfPosts;
+      mapOfAllUserPosts = mapOfAllUserPosts;
+      if (listOfPosts!.length < 15) {
+        noOfPostsShown = listOfPosts!.length;
+      }
+    });
   }
 
-  Future<void> followingSomeUsersRecommendation({
-    required Map mapOfAllUserPosts,
-    required Map mapOfAllUsers,
-    required List followedUsers,
-  }) async {
-    final List listOfAllPostIds = (mapOfAllUserPosts
-          ..removeWhere(
-            (key, value) =>
-                value == currentUserUID ||
-                !(followedUsers.contains(
-                  value,
-                )),
-          ))
-        .keys
-        .toList()
-        .toSet()
-        .toList();
+  showfilteredPosts() async {
+    late final List listOfFollowedUsers;
 
-    final List listOfNotFollowedUsers = (mapOfAllUsers
-          ..removeWhere((key, value) =>
-              value == currentUserUID ||
-              followedUsers.contains(
-                value,
-              )))
-        .keys
-        .toList()
-        .toSet()
-        .toList()
-      ..shuffle();
-
-    final List listOfNotFollowedUsersPosts = ((mapOfAllUserPosts)
-          ..removeWhere((key, value) =>
-              value == currentUserUID ||
-              !(listOfNotFollowedUsers.contains(
-                value,
-              ))))
-        .keys
-        .toList()
-        .toSet()
-        .toList();
-
-    print(listOfNotFollowedUsersPosts);
-
-    for (int index = 0; index < listOfAllPostIds.length / 5; index++) {
-      listOfAllPostIds.add(listOfNotFollowedUsersPosts[index]);
-    }
-
-    if (mounted) {
-      setState(
-        () {
-          listOfPosts = (listOfAllPostIds..shuffle(Random())).toSet().toList();
-          mapOfAllUserPosts = mapOfAllUserPosts;
-          if (noOfPostsShown > listOfPosts!.length) {
-            noOfPostsShown = listOfPosts!.length;
-          }
-        },
-      );
-    }
-
-    return;
-  }
-
-  // Reccomendation Choosing Method
-  void selectPostsToShowTheUser() async {
-    late final followedUsers;
+    // get followed Users list
     try {
-      followedUsers = (List.from(widget.currentDatabaseSnapshot
-              .child('users')
-              .child(currentUserUID)
-              .child('following')
-              .value as List)
-            ..remove('placeHolder'))
-          .toSet()
-          .toList();
-    } catch (e) {
-      followedUsers = (List.from((widget.currentDatabaseSnapshot
-                  .child('users')
-                  .child(currentUserUID)
+      listOfFollowedUsers = ((await DatabaseService.database
+                  .ref('users')
+                  .child(AuthService.auth.currentUser!.uid)
                   .child('following')
-                  .value as Map)
-              .values)
-            ..remove('placeHolder'))
+                  .get())
+              .value as List)
           .toSet()
-          .toList();
+          .toList(growable: true)
+        ..remove('placeHolder');
+    } catch (e) {
+      listOfFollowedUsers = ((await DatabaseService.database
+                  .ref('users')
+                  .child(AuthService.auth.currentUser!.uid)
+                  .child('following')
+                  .get())
+              .value as Map)
+          .values
+          .toSet()
+          .toList(growable: true)
+        ..remove('placeHolder');
     }
 
-    final Map mapOfAllUsers =
-        (widget.currentDatabaseSnapshot.child('all users').value as Map);
+    final List listOfNotFollowedUsers =
+        ((((await DatabaseService.database.ref('all users').get()).value
+                as Map))
+              ..removeWhere(
+                (uid, username) =>
+                    listOfFollowedUsers.contains(uid) ||
+                    uid == AuthService.auth.currentUser!.uid,
+              ))
+            .keys
+            .toSet()
+            .toList(growable: true);
+
+    final Map mapOfUsedPosts =
+        ((await DatabaseService.database.ref('all posts').get()).value as Map)
+          ..removeWhere(
+            (postID, authorID) =>
+                authorID == AuthService.auth.currentUser!.uid ||
+                listOfNotFollowedUsers.contains(authorID),
+          );
+
+    listOfPosts = mapOfUsedPosts.keys.toSet().toList(growable: true);
+
+    final Map mapOfUnusedPosts =
+        ((await DatabaseService.database.ref('all posts').get()).value as Map)
+          ..removeWhere(
+            (postID, authorID) =>
+                authorID == AuthService.auth.currentUser!.uid ||
+                listOfFollowedUsers.contains(authorID),
+          );
 
     mapOfAllUserPosts =
-        (widget.currentDatabaseSnapshot.child('all posts').value as Map?);
+        ((await DatabaseService.database.ref('all posts').get()).value as Map)
+          ..removeWhere(
+            (postID, authorID) => authorID == AuthService.auth.currentUser!.uid,
+          );
 
-    // If there Are no posts on the Platform:
-
-    if (mapOfAllUserPosts == null || mapOfAllUserPosts!.isEmpty) {
-      if (mounted) {
-        setState(() {
-          listOfPosts = [];
-          mapOfAllUserPosts = {};
-        });
+    if (mapOfUnusedPosts.isNotEmpty) {
+      for (int i = 0; i < mapOfUsedPosts.length / 5; i++) {
+        var randomPostID = (mapOfUnusedPosts.keys.toSet().toList(growable: true)
+          ..shuffle(Random()))[0];
+        while (listOfPosts!.contains(randomPostID)) {
+          randomPostID = (mapOfUnusedPosts.keys.toSet().toList(growable: true)
+            ..shuffle(Random()))[0];
+        }
+        listOfPosts!.add(randomPostID);
       }
-      return;
     }
 
-    // Select What Post Exctraction Method To Use
+    setState(() {
+      listOfPosts = listOfPosts;
+      mapOfAllUserPosts = mapOfAllUserPosts;
+      if (listOfPosts!.length < 15) {
+        noOfPostsShown = listOfPosts!.length;
+      }
+    });
+  }
 
-    // In case user is following nobody
-    if (followedUsers.isEmpty) {
-      await notFilteredRecommendationFunction(
-          mapOfAllUserPosts: mapOfAllUserPosts!);
-      return;
+  // reccomendation chooser
+
+  recommendationChooser() async {
+    late final List listOfFollowedUsers;
+
+    // get followed Users list
+    try {
+      listOfFollowedUsers = ((await DatabaseService.database
+                  .ref('users')
+                  .child(AuthService.auth.currentUser!.uid)
+                  .child('following')
+                  .get())
+              .value as List)
+          .toSet()
+          .toList(growable: true)
+        ..remove('placeHolder');
+    } catch (e) {
+      listOfFollowedUsers = ((await DatabaseService.database
+                  .ref('users')
+                  .child(AuthService.auth.currentUser!.uid)
+                  .child('following')
+                  .get())
+              .value as Map)
+          .values
+          .toSet()
+          .toList(growable: true)
+        ..remove('placeHolder');
     }
 
-    // In case User is following every user on the platform
-    else if (followedUsers.length == mapOfAllUsers.keys.length) {
-      await notFilteredRecommendationFunction(
-          mapOfAllUserPosts: mapOfAllUserPosts!);
-      return;
+    final List listOfNotFollowedUsers =
+        ((((await DatabaseService.database.ref('all users').get()).value
+                as Map))
+              ..removeWhere(
+                (uid, username) =>
+                    listOfFollowedUsers.contains(uid) ||
+                    uid == AuthService.auth.currentUser!.uid,
+              ))
+            .keys
+            .toSet()
+            .toList(growable: true);
+
+    mapOfAllUserPosts =
+        ((await DatabaseService.database.ref('all posts').get()).value as Map)
+          ..removeWhere(
+            (postID, authorID) => authorID == AuthService.auth.currentUser!.uid,
+          );
+
+    if (mapOfAllUserPosts!.isEmpty) {
+      setState(() {
+        listOfPosts = [];
+
+        mapOfAllUserPosts = {};
+
+        noOfPostsShown = 1;
+      });
     }
 
-    // When the User is a Normal Person
-    else {
-      await followingSomeUsersRecommendation(
-        mapOfAllUserPosts: mapOfAllUserPosts!,
-        mapOfAllUsers: mapOfAllUsers,
-        followedUsers: followedUsers,
-      );
-      return;
+    if (listOfFollowedUsers.isEmpty || listOfNotFollowedUsers.isEmpty) {
+      showAllUserPosts();
+    } else {
+      showfilteredPosts();
     }
   }
 
   @override
   void initState() {
+    recommendationChooser();
     super.initState();
-    selectPostsToShowTheUser();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List listOfPostsToBeShown = (listOfPosts!.toSet().toList());
     return listOfPosts == null || mapOfAllUserPosts == null
-        ? const LoadingScreen(loadingText: 'Loading some posts For you')
-        : listOfPosts!.isEmpty
-            ? const Center(
-                child: Card(
-                  child: SizedBox(
-                    height: 150,
-                    width: 250,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Error Occured!",
-                            style: TextStyle(fontSize: 18, color: Colors.amber),
-                          ),
-                          Text(
-                            "Please try again later...",
-                            style: TextStyle(fontSize: 18, color: Colors.amber),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : Scaffold(
-                body: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: noOfPostsShown + 1,
-                  itemBuilder: (context, index) {
-                    if (index == noOfPostsShown) {
-                      return const Center(
-                        child: Card(
-                          child: SizedBox(
-                            height: 75,
-                            width: 100,
-                            child: Center(
-                              child: Text("Load More"),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return PostBlock(
-                      currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
-                      postData: widget.currentDatabaseSnapshot
-                          .child('users')
-                          .child(
-                              mapOfAllUserPosts![listOfPostsToBeShown[index]])
-                          .child('posts')
-                          .child(listOfPostsToBeShown[index]),
-                    );
-                  },
-                ),
-              );
+        ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+        : SafeArea(
+            child: Scaffold(
+              body: ListView.builder(
+                itemCount: noOfPostsShown,
+                itemBuilder: (context, index) {
+                  return PostBlock(
+                    postData: widget.currentDatabaseSnapshot
+                        .child('users')
+                        .child(mapOfAllUserPosts![listOfPosts![index]])
+                        .child("posts")
+                        .child(listOfPosts![index]),
+                    currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
+                  );
+                },
+              ),
+            ),
+          );
   }
 }
