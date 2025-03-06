@@ -8,7 +8,7 @@ import 'package:pixify/features/auth/components/image_selector.dart';
 import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/database_service.dart';
 import 'package:pixify/services/settings_service.dart';
-import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/models/settings_model.dart';
 import 'package:pixify/helper/show_alert_dialog.dart';
 
 class UserInfoPage extends StatefulWidget {

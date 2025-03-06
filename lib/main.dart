@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pixify/features/loading/loading_screen.dart';
 import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/settings_service.dart';
-import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/models/settings_model.dart';
 import 'package:pixify/supabase_initializer.dart';
 import 'package:pixify/wrapper.dart';
 import 'package:provider/provider.dart';

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pixify/services/settings_service.dart';
-import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/models/settings_model.dart';
 import 'package:pixify/helper/show_alert_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

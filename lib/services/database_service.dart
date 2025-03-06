@@ -6,7 +6,7 @@ import 'package:pixify/constant_values.dart';
 import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/settings_service.dart';
 import 'package:pixify/services/storage_service.dart';
-import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/models/settings_model.dart';
 import 'package:pixify/helper/show_alert_dialog.dart';
 import 'package:pixify/models/user_model.dart';
 

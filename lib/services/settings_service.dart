@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:pixify/features/settings/settings_model.dart';
+import 'package:pixify/models/settings_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 SettingsModel settingsValues = SettingsModel(
