@@ -98,8 +98,7 @@ class NotificationService {
     await platform?.createNotificationChannel(androidChannel);
   }
 
-  static Future<String> getAccessToken() async {
-  }
+  static Future<String> getAccessToken() async {}
 
   static Future<void> sendNotification({
     required String fcmToken, // FCM token of the recipient device
