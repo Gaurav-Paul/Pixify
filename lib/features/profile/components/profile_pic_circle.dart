@@ -28,6 +28,8 @@ class ProfilePicCircle extends StatelessWidget {
                   Center(
                     child: InteractiveViewer(
                       child: Image.network(
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Text("Error"),
                         profilePicURL,
                         loadingBuilder: (context, child, loadingProgress) =>
                             loadingProgress != null
@@ -71,7 +73,10 @@ class ProfilePicCircle extends StatelessWidget {
         child: CircleAvatar(
           radius: imageCircleRadius ?? 23,
           backgroundColor: Colors.black,
-          foregroundImage: NetworkImage(profilePicURL),
+          foregroundImage: Image.network(
+            profilePicURL,
+            errorBuilder: (context, error, stackTrace) => const Text("Error"),
+          ).image,
         ),
       ),
     );

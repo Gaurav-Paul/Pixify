@@ -28,50 +28,55 @@ class ProfilePage extends StatelessWidget {
               ]
             : null,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          UserInfoCard(
-            currentDatabaseSnapshot: currentDatabaseSnapshot,
-            userID: userID,
-          ),
-          const SizedBox(height: 35),
-          Expanded(
-            child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  TabBar(
-                    labelColor: Colors.amber,
-                    indicatorColor: Colors.amber,
-                    tabs: [
-                      Text(
-                          "${userID == AuthService.auth.currentUser!.uid ? "Your " : ''}Thoughts.."),
-                      Text(
-                          "${userID == AuthService.auth.currentUser!.uid ? "Your " : ''}Pics"),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              UserInfoCard(
+                currentDatabaseSnapshot: currentDatabaseSnapshot,
+                userID: userID,
+              ),
+              const SizedBox(height: 35),
+              Expanded(
+                child: DefaultTabController(
+                  length: 2,
+                  child: Column(
+                    children: [
+                      TabBar(
+                        labelColor: Colors.amber,
+                        indicatorColor: Colors.amber,
+                        tabs: [
+                          Text(
+                              "${userID == AuthService.auth.currentUser!.uid ? "Your " : ''}Thoughts.."),
+                          Text(
+                              "${userID == AuthService.auth.currentUser!.uid ? "Your " : ''}Pics"),
+                        ],
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          dragStartBehavior: DragStartBehavior.down,
+                          children: [
+                            TextPostGrid(
+                              currentDatabaseSnapshot: currentDatabaseSnapshot,
+                              userID: userID,
+                            ),
+                            ImagePostGrid(
+                              currentDatabaseSnapshot: currentDatabaseSnapshot,
+                              userID: userID,
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  Expanded(
-                    child: TabBarView(
-                      dragStartBehavior: DragStartBehavior.down,
-                      children: [
-                        TextPostGrid(
-                          currentDatabaseSnapshot: currentDatabaseSnapshot,
-                          userID: userID,
-                        ),
-                        ImagePostGrid(
-                          currentDatabaseSnapshot: currentDatabaseSnapshot,
-                          userID: userID,
-                        )
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

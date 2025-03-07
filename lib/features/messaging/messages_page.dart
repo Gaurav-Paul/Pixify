@@ -13,6 +13,8 @@ class MessagesPage extends StatelessWidget {
     required this.currentDatabaseSnapshot,
   });
 
+  static const String route = "/messages-page-route";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +65,7 @@ class MessagesPage extends StatelessWidget {
         backgroundColor: Colors.amber,
         foregroundColor: Colors.black87,
         shape: const CircleBorder(),
-        child: const Icon(Icons.edit, size: 28),
+        child: const Icon(Icons.person_add_alt_1, size: 28),
       ),
     );
   }

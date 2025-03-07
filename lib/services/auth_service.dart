@@ -26,6 +26,8 @@ class AuthService {
         password: password,
       );
 
+      await DatabaseService().updateUserFcmToken(uid: userCredential.user!.uid);
+
       SettingsService.settingsStream.add(
           SettingsModel(isLoading: true, loadingText: "You're signed In!"));
 
@@ -95,6 +97,9 @@ class AuthService {
 
       await DatabaseService()
           .updateUserPresence(signOut: true, uid: auth.currentUser!.uid);
+
+      await DatabaseService()
+          .updateUserFcmToken(uid: auth.currentUser!.uid, remove: true);
 
       await auth.signOut();
 

@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/profile/components/profile_pic_circle.dart';
 import 'package:pixify/features/profile/profile_page.dart';
+import 'package:pixify/features/search/components/follow_button.dart';
 import 'package:pixify/services/database_service.dart';
 
 class SearchUserTile extends StatefulWidget {
@@ -67,26 +68,11 @@ class _SearchUserTileState extends State<SearchUserTile> {
               .value
               .toString(),
         ),
-        trailing: !loading
-            ? TextButton(
-                onPressed: () => followOrUnFollow(
-                    context: context,
-                    follow: widget.listOfFollowedUsers.contains(widget.userID)
-                        ? false
-                        : true),
-                child: following ??  widget.listOfFollowedUsers.contains(widget.userID)
-                    ? const Text("Unfollow")
-                    : const Text('Follow'),
-              )
-            : const SizedBox(
-                height: 50,
-                width: 50,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.amber,
-                  ),
-                ),
-              ),
+        trailing: FollowButton(
+          userID: widget.userID,
+          currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
+          listOfFollowedUsers: widget.listOfFollowedUsers,
+        ),
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:pixify/features/add%20post/add_post_page.dart';
 import 'package:pixify/features/home/home_page.dart';
 import 'package:pixify/features/loading/loading_screen.dart';
 import 'package:pixify/features/messaging/messages_page.dart';
@@ -13,7 +12,11 @@ import 'package:pixify/services/database_service.dart';
 import 'package:provider/provider.dart';
 
 class ContentWrapper extends StatefulWidget {
-  const ContentWrapper({super.key});
+  final int? page;
+  const ContentWrapper({
+    super.key,
+    this.page,
+  });
 
   @override
   State<ContentWrapper> createState() => _ContentWrapperState();
@@ -23,12 +26,26 @@ class _ContentWrapperState extends State<ContentWrapper> {
   int navBarIndex = 0;
   Widget? pageShown;
   late final Timer timer;
+  DataSnapshot? cds;
+
+  asyncInitStuff() async {
+    if (mounted) {
+      cds = await DatabaseService.database.ref(null).get();
+      setState(() {
+        cds = cds;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     DatabaseService().updateUserPresence();
     timer = Timer(const Duration(minutes: 1), () {});
+    asyncInitStuff();
+    if (widget.page != null && widget.page == 2) {
+      navBarIndex = 1;
+    }
   }
 
   @override
@@ -44,9 +61,15 @@ class _ContentWrapperState extends State<ContentWrapper> {
         ? const LoadingScreen(loadingText: 'Accessing the Database')
         : Scaffold(
             body: navBarIndex == 0
-                ? HomePage(
-                    currentDatabaseSnapshot: currentDatabaseState.snapshot)
-                : pageShown,
+                ? StreamProvider.value(
+                    value: DatabaseService.getEntireDatabaseStream(),
+                    initialData: currentDatabaseState,
+                    child: HomePage(
+                        currentDatabaseSnapshot: currentDatabaseState.snapshot),
+                  )
+                : 
+                navBarIndex == 1 ? MessagesPage(currentDatabaseSnapshot: currentDatabaseState.snapshot) :
+                pageShown,
             bottomNavigationBar: NavigationBar(
               selectedIndex: navBarIndex,
               elevation: 2,
@@ -58,20 +81,22 @@ class _ContentWrapperState extends State<ContentWrapper> {
                   setState(() {
                     navBarIndex = value;
                     if (value == 0) {
-                      pageShown = HomePage(
-                          currentDatabaseSnapshot:
-                              currentDatabaseState.snapshot);
+                      pageShown = StreamProvider.value(
+                        value: DatabaseService.getEntireDatabaseStream(),
+                        initialData: currentDatabaseState,
+                        child: HomePage(
+                            currentDatabaseSnapshot:
+                                currentDatabaseState.snapshot),
+                      );
                     } else if (value == 1) {
                       pageShown = MessagesPage(
                         currentDatabaseSnapshot: currentDatabaseState.snapshot,
                       );
                     } else if (value == 2) {
-                      pageShown = const AddPostPage();
-                    } else if (value == 3) {
                       pageShown = SearchPage(
                         userID: AuthService.auth.currentUser!.uid,
                       );
-                    } else if (value == 4) {
+                    } else if (value == 3) {
                       pageShown = ProfilePage(
                         currentDatabaseSnapshot: currentDatabaseState.snapshot,
                         userID: AuthService.auth.currentUser!.uid,
@@ -96,14 +121,6 @@ class _ContentWrapperState extends State<ContentWrapper> {
                   ),
                   icon: Icon(Icons.message_outlined),
                   label: "Message",
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(
-                    Icons.add,
-                    color: Colors.black87,
-                  ),
-                  icon: Icon(Icons.add),
-                  label: "Add",
                 ),
                 NavigationDestination(
                   selectedIcon: Icon(

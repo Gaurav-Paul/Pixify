@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/constant_values.dart';
 import 'package:pixify/services/auth_service.dart';
+import 'package:pixify/services/notification_service.dart';
 import 'package:pixify/services/settings_service.dart';
 import 'package:pixify/services/storage_service.dart';
 import 'package:pixify/models/settings_model.dart';
@@ -14,6 +15,22 @@ class DatabaseService {
   static final FirebaseDatabase database = FirebaseDatabase.instance
     ..refFromURL(
         'https://pixify-f1e57-default-rtdb.asia-southeast1.firebasedatabase.app/');
+
+  updateUserFcmToken({required String uid, bool? remove}) async {
+    if (remove!=null) {
+      await database
+          .ref(null)
+          .child('users')
+          .child(uid)
+          .update({"fcmToken": ''});
+      return;
+    }
+    await database
+        .ref(null)
+        .child('users')
+        .child(uid)
+        .update({"fcmToken": await NotificationService().getFcmToken()});
+  }
 
   updateUserPresence({
     bool? signOut,
@@ -81,18 +98,19 @@ class DatabaseService {
 
       await database.ref('users').child(uid).set(
             UserModel(
-              username: username,
-              uid: uid,
-              email: email,
-              profilePicURL: profilePicURL,
-              posts: ['placeHolder'],
-              followers: ['placeHolder'],
-              following: ['placeHolder'],
-              isPrivate: false,
-              active: true,
-              conversations: ["placeHolder"],
-              lastSeen: DateTime.now().microsecondsSinceEpoch,
-            ).toMap(),
+                    username: username,
+                    uid: uid,
+                    email: email,
+                    profilePicURL: profilePicURL,
+                    posts: ['placeHolder'],
+                    followers: ['placeHolder'],
+                    following: ['placeHolder'],
+                    isPrivate: false,
+                    active: true,
+                    conversations: ["placeHolder"],
+                    lastSeen: DateTime.now().microsecondsSinceEpoch,
+                    fcmToken: await NotificationService().getFcmToken())
+                .toMap(),
           );
 
       await database.ref('all users').update({uid: username});

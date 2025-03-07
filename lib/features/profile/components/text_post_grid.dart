@@ -68,9 +68,10 @@ class _TextPostGridState extends State<TextPostGrid> {
                 itemCount: listOfTextPosts.length,
                 itemBuilder: (context, index) {
                   return PostBlock(
-                      isOwner: true,
-                      postData: listOfTextPosts[index],
-                      currentDatabaseSnapshot: widget.currentDatabaseSnapshot);
+                    isOwner: true,
+                    postData: listOfTextPosts[index],
+                    currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
+                  );
                 },
               );
   }

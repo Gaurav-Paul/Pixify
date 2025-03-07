@@ -24,6 +24,7 @@ class _AddPostPageState extends State<AddPostPage>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(),
         body: TabBarView(
           dragStartBehavior: DragStartBehavior.down,
           controller: tabController,

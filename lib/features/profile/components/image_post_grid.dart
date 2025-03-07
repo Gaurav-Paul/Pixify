@@ -122,6 +122,7 @@ class _ImagePostGridState extends State<ImagePostGrid> {
                                                 height: 300,
                                                 width: 300,
                                                 child: Image.network(
+                        errorBuilder: (context, error, stackTrace) => const Text("Error"),
                                                   fit: BoxFit.contain,
                                                   listOfImagePosts[index]
                                                       .child('imageURL')
@@ -200,6 +201,7 @@ class _ImagePostGridState extends State<ImagePostGrid> {
                         alignment: Alignment.bottomRight,
                         children: [
                           Image.network(
+                        errorBuilder: (context, error, stackTrace) => const Text("Error"),
                             listOfImagePosts[index]
                                 .child('imageURL')
                                 .value

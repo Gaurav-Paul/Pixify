@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pixify/helper/show_alert_dialog.dart';
 import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/database_service.dart';
+import 'package:pixify/services/notification_service.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatService {
@@ -47,6 +48,12 @@ class ChatService {
           receiverUserDataSnapshot: recieverUserDataSnapshot,
           lastMessage: textMessage,
           timeSent: timeSent);
+
+      await NotificationService.sendNotification(
+        fcmToken: recieverUserDataSnapshot.child('fcmToken').value.toString(),
+        title: senderUserDataSnapshot.child('username').value.toString(),
+        body: textMessage,
+      );
     } catch (e) {
       showAlertDialog(context: context, content: e.toString());
     }

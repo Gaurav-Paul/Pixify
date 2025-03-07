@@ -42,9 +42,7 @@ class TextOnlyTab extends StatelessWidget {
                   } else if (value.length > 512) {
                     return "Too Many Character. maximum of 512 allowed";
                   }
-                  if ((value.split('')..removeWhere((char) => char == ' '))
-                          .toString() ==
-                      '[]') {
+                  if (value.trim().isEmpty) {
                     return 'Posts Cannot contain purely whitespace';
                   }
 
@@ -76,6 +74,9 @@ class TextOnlyTab extends StatelessWidget {
                             content:
                                 "Enter Something in the Text Field To post...");
                       }
+
+                      Navigator.of(context).pop();
+
                       DatabaseService().addTextOnlyPost(
                         text: textOnlyController.text,
                         authorID: currentUserUID,

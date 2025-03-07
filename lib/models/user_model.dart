@@ -10,6 +10,7 @@ class UserModel {
   final bool active;
   final int lastSeen;
   final bool isPrivate;
+  final String fcmToken;
 
   UserModel({
     required this.username,
@@ -23,6 +24,7 @@ class UserModel {
     required this.conversations,
     required this.active,
     required this.lastSeen,
+    required this.fcmToken,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class UserModel {
       "active": true,
       "lastSeen": DateTime.now().microsecondsSinceEpoch,
       "conversations": conversations,
+      "fcmToken" : fcmToken
     };
   }
 
@@ -54,6 +57,7 @@ class UserModel {
       conversations: map['conversations'],
       active: map["active"],
       lastSeen: map['lastSeen'],
+      fcmToken: map['fcmToken']
     );
   }
 }

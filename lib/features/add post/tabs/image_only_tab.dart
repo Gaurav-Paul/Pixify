@@ -49,7 +49,7 @@ class _ImageOnlyTabState extends State<ImageOnlyTab> {
 
     List<AssetEntity> images = await albums[0].getAssetListPaged(
       page: 0,
-      size: 100000,
+      size: 500,
     );
 
     List<Widget> temp = [];

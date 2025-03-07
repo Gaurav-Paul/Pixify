@@ -2,16 +2,19 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pixify/features/home/components/like_button.dart';
 import 'package:pixify/features/profile/components/profile_pic_circle.dart';
+import 'package:pixify/features/search/components/follow_button.dart';
 
 class PostBlock extends StatelessWidget {
   final DataSnapshot currentDatabaseSnapshot;
   final DataSnapshot postData;
   final bool? isOwner;
+  final List? listOfFollowedUsers;
   const PostBlock({
     super.key,
     required this.postData,
     required this.currentDatabaseSnapshot,
     this.isOwner,
+    this.listOfFollowedUsers,
   });
 
   @override
@@ -22,6 +25,7 @@ class PostBlock extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         children: [
+          // author Info
           ListTile(
             contentPadding: const EdgeInsets.all(0),
             leading: ProfilePicCircle(
@@ -30,8 +34,16 @@ class PostBlock extends StatelessWidget {
             ),
             title: Text(
                 "${currentDatabaseSnapshot.child("all users").child('${postData.child('uid').value}').value}"),
+            trailing: isOwner ?? false
+                ? const SizedBox()
+                : FollowButton(
+                    userID: postData.child('uid').value.toString(),
+                    currentDatabaseSnapshot: currentDatabaseSnapshot,
+                    listOfFollowedUsers: listOfFollowedUsers!),
           ),
           const SizedBox(height: 15),
+
+          //content
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Row(

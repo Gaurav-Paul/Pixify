@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:pixify/constant_values.dart';
+import 'package:pixify/features/add%20post/add_post_page.dart';
 import 'package:pixify/features/home/components/post_block.dart';
 import 'package:pixify/services/auth_service.dart';
 import 'package:pixify/services/database_service.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   final DataSnapshot currentDatabaseSnapshot;
@@ -203,23 +206,78 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final DataSnapshot currentDatabaseSnapshot =
+        (Provider.of<DatabaseEvent>(context)).snapshot;
+
+    List listOfFollowedUsers;
+
+    // get followed Users list
+    try {
+      listOfFollowedUsers = (currentDatabaseSnapshot.value as List)
+          .toSet()
+          .toList(growable: true)
+        ..remove('placeHolder');
+    } catch (e) {
+      listOfFollowedUsers = (currentDatabaseSnapshot.value as Map)
+          .values
+          .toSet()
+          .toList(growable: true)
+        ..remove('placeHolder');
+    }
+
     return listOfPosts == null || mapOfAllUserPosts == null
         ? const Center(child: CircularProgressIndicator(color: Colors.amber))
-        : SafeArea(
-            child: Scaffold(
-              body: ListView.builder(
-                itemCount: noOfPostsShown,
-                itemBuilder: (context, index) {
-                  return PostBlock(
-                    postData: widget.currentDatabaseSnapshot
-                        .child('users')
-                        .child(mapOfAllUserPosts![listOfPosts![index]])
-                        .child("posts")
-                        .child(listOfPosts![index]),
-                    currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
-                  );
-                },
+        : Scaffold(
+            appBar: AppBar(
+              elevation: .2,
+              title: Row(
+                children: [
+                  SizedBox(
+                      height: 45,
+                      width: 45,
+                      child: FittedBox(
+                          child: Image.network(ConstantValues.pixifyLens))),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Pixify",
+                    style: TextStyle(fontFamily: "Handwriting", fontSize: 36),
+                  )
+                ],
               ),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const AddPostPage())),
+                  style: IconButton.styleFrom(
+                      iconSize: 20, foregroundColor: Colors.amber),
+                  color: Colors.amber,
+                  icon: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.amber),
+                        borderRadius: BorderRadius.circular(100),
+                        color: Colors.transparent),
+                    child: const Center(
+                      child: Icon(Icons.add, color: Colors.amber, size: 30),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            body: ListView.builder(
+              itemCount: noOfPostsShown,
+              itemBuilder: (context, index) {
+                return PostBlock(
+                  postData: widget.currentDatabaseSnapshot
+                      .child('users')
+                      .child(mapOfAllUserPosts![listOfPosts![index]])
+                      .child("posts")
+                      .child(listOfPosts![index]),
+                  currentDatabaseSnapshot: widget.currentDatabaseSnapshot,
+                  listOfFollowedUsers: listOfFollowedUsers,
+                );
+              },
             ),
           );
   }

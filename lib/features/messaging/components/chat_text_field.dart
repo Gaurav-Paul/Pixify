@@ -16,7 +16,8 @@ class _ChatTextFieldState extends State<ChatTextField> {
   final TextEditingController chatTextController = TextEditingController();
 
   sendMessage() async {
-    if (chatTextController.text.isEmpty) {
+    if (chatTextController.text.isEmpty ||
+        chatTextController.text.trim().isEmpty) {
       return;
     }
 
@@ -87,6 +88,14 @@ class _ChatTextFieldState extends State<ChatTextField> {
                     child: TextField(
                       controller: chatTextController,
                       onChanged: (value) {
+                        if (value.trim().isEmpty) {
+                          if (mounted) {
+                            setState(() {
+                              isExtended = true;
+                            });
+                          }
+                          return;
+                        }
                         if (value.isNotEmpty) {
                           if (mounted) {
                             setState(() {

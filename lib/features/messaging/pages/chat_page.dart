@@ -1,6 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:pixify/features/messaging/call/call_page.dart';
 import 'package:pixify/features/messaging/components/chat_bubble.dart';
 import 'package:pixify/features/messaging/components/chat_text_field.dart';
 import 'package:pixify/features/profile/components/profile_pic_circle.dart';
@@ -10,11 +9,13 @@ import 'package:provider/provider.dart';
 class ChatPage extends StatelessWidget {
   final DataSnapshot currentDatabaseSnapshot;
   final String userID;
-  const ChatPage({
+  ChatPage({
     super.key,
     required this.currentDatabaseSnapshot,
     required this.userID,
   });
+
+  final ScrollController scrollController = ScrollController();
 
   String calculateTimeDifferenceMessage(Duration differenceDuration) {
     return differenceDuration.inSeconds > 59
@@ -29,6 +30,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DatabaseEvent? messagesEvent = Provider.of<DatabaseEvent?>(context);
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: messagesEvent == null
@@ -111,28 +113,6 @@ class ChatPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                actions: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => CallPage(
-                            uid: userID,
-                            username: currentDatabaseSnapshot
-                                .child('users')
-                                .child(userID)
-                                .child('username')
-                                .value
-                                .toString(),
-                            callID:
-                                ((AuthService.auth.currentUser!.uid + userID)
-                                        .split('')
-                                      ..sort())
-                                    .toString()),
-                      ),
-                    ),
-                    icon: const Icon(Icons.call),
-                  )
-                ],
               ),
               body: Column(
                 children: [
@@ -151,10 +131,15 @@ class ChatPage extends StatelessWidget {
                         )
                       : Expanded(
                           child: ListView.builder(
+                            controller: scrollController,
                             itemCount: messagesEvent.snapshot.exists
                                 ? messagesEvent.snapshot.children.length
                                 : 1,
                             itemBuilder: (context, index) {
+                              // if(scrollController.hasClients){
+                              // scrollController.animateTo(0,
+                              //     duration: const Duration(milliseconds: 1),
+                              //     curve: Curves.linear);}
                               return Container(
                                 alignment: messagesEvent.snapshot.children
                                             .toList()[index]

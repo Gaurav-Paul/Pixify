@@ -40,6 +40,8 @@ class AddCaptionPage extends StatelessWidget {
                   }
 
                   Navigator.of(context).pop();
+
+                  Navigator.of(context).pop();
                   DatabaseService().addImagePost(
                     imageFile: selectedImageFile,
                     context: context,
