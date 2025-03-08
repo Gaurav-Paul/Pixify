@@ -16,6 +16,7 @@ class ChatPage extends StatelessWidget {
   });
 
   final ScrollController scrollController = ScrollController();
+  final PageStorageBucket pageStorageBucket = PageStorageBucket();
 
   String calculateTimeDifferenceMessage(Duration differenceDuration) {
     return differenceDuration.inSeconds > 59
@@ -114,60 +115,67 @@ class ChatPage extends StatelessWidget {
                   ],
                 ),
               ),
-              body: Column(
-                children: [
-                  !(messagesEvent.snapshot.exists)
-                      ? const Expanded(
-                          child: Center(
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              "Send a message and start a conversation!",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.amber,
+              body: PageStorage(
+                bucket: pageStorageBucket,
+                child: Column(
+                  children: [
+                    !(messagesEvent.snapshot.exists)
+                        ? const Expanded(
+                            child: Center(
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                "Send a message and start a conversation!",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.amber,
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      : Expanded(
-                          child: ListView.builder(
-                            controller: scrollController,
-                            itemCount: messagesEvent.snapshot.exists
-                                ? messagesEvent.snapshot.children.length
-                                : 1,
-                            itemBuilder: (context, index) {
-                              // if(scrollController.hasClients){
-                              // scrollController.animateTo(0,
-                              //     duration: const Duration(milliseconds: 1),
-                              //     curve: Curves.linear);}
-                              return Container(
-                                alignment: messagesEvent.snapshot.children
+                          )
+                        : Expanded(
+                            child: ListView.builder(
+                              key: const PageStorageKey('chat_page_list'),
+                              controller: scrollController,
+                              itemCount: messagesEvent.snapshot.exists
+                                  ? messagesEvent.snapshot.children.length
+                                  : 1,
+                              itemBuilder: (context, index) {
+                                print(scrollController.position);
+                                // if (scrollController.hasClients) {
+                                //   scrollController.jumpTo(double.minPositive);
+                                // }
+                                return Container(
+                                  alignment: messagesEvent.snapshot.children
+                                              .toList()[index]
+                                              .child('senderId')
+                                              .value
+                                              .toString() ==
+                                          AuthService.auth.currentUser!.uid
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: ChatBubble(
+                                    message: messagesEvent.snapshot.children
+                                        .toList()[index]
+                                        .child('textMessage')
+                                        .value
+                                        .toString(),
+                                    isOwner: messagesEvent.snapshot.children
                                             .toList()[index]
                                             .child('senderId')
                                             .value
                                             .toString() ==
-                                        AuthService.auth.currentUser!.uid
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                                child: ChatBubble(
-                                  message: messagesEvent.snapshot.children
-                                      .toList()[index]
-                                      .child('textMessage')
-                                      .value
-                                      .toString(),
-                                  isOwner: messagesEvent.snapshot.children
-                                          .toList()[index]
-                                          .child('senderId')
-                                          .value
-                                          .toString() ==
-                                      AuthService.auth.currentUser!.uid,
-                                ),
-                              );
-                            },
+                                        AuthService.auth.currentUser!.uid,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                  ChatTextField(recieverUID: userID)
-                ],
+                    ChatTextField(
+                      recieverUID: userID,
+                      scrollController: scrollController,
+                    )
+                  ],
+                ),
               ),
             ),
     );

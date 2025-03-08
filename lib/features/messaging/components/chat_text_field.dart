@@ -4,7 +4,12 @@ import 'package:pixify/services/chat_service.dart';
 
 class ChatTextField extends StatefulWidget {
   final String recieverUID;
-  const ChatTextField({super.key, required this.recieverUID});
+  final ScrollController scrollController;
+  const ChatTextField({
+    super.key,
+    required this.recieverUID,
+    required this.scrollController,
+  });
 
   @override
   State<ChatTextField> createState() => _ChatTextFieldState();
@@ -14,6 +19,17 @@ class _ChatTextFieldState extends State<ChatTextField> {
   bool isExtended = true;
   bool loading = false;
   final TextEditingController chatTextController = TextEditingController();
+
+  @override
+  void initState() {
+    
+    super.initState();
+    widget.scrollController.animateTo(
+      1000000,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeIn,
+    );
+  }
 
   sendMessage() async {
     if (chatTextController.text.isEmpty ||
@@ -32,6 +48,12 @@ class _ChatTextFieldState extends State<ChatTextField> {
       textMessage: chatTextController.text,
       receiverUserUid: widget.recieverUID,
       senderUserUid: AuthService.auth.currentUser!.uid,
+    );
+
+    await widget.scrollController.animateTo(
+      1000000,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeIn,
     );
 
     chatTextController.clear();
